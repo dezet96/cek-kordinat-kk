@@ -6,142 +6,146 @@
   <title>Cek Koordinat KK</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1e293b; min-height: 100vh; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',sans-serif; background:#f0f4f8; color:#1e293b; min-height:100vh; }
 
     .header {
-      background: linear-gradient(135deg, #1e40af, #3b82f6);
-      color: white; padding: 16px 24px;
-      display: flex; align-items: center; gap: 14px;
-      box-shadow: 0 2px 12px rgba(30,64,175,0.3);
+      background:linear-gradient(135deg,#1e40af,#3b82f6);
+      color:white; padding:16px 24px;
+      display:flex; align-items:center; gap:14px;
+      box-shadow:0 2px 12px rgba(30,64,175,.3);
     }
     .header-icon {
-      width: 42px; height: 42px; background: rgba(255,255,255,0.15);
-      border-radius: 10px; display: flex; align-items: center;
-      justify-content: center; font-size: 20px;
+      width:42px; height:42px; background:rgba(255,255,255,.15);
+      border-radius:10px; display:flex; align-items:center;
+      justify-content:center; font-size:20px;
     }
-    .header h1 { font-size: 18px; font-weight: 700; }
-    .header p  { font-size: 11px; opacity: 0.8; margin-top: 1px; }
+    .header h1 { font-size:18px; font-weight:700; }
+    .header p  { font-size:11px; opacity:.8; margin-top:1px; }
 
     .container {
-      display: grid; grid-template-columns: 370px 1fr;
-      height: calc(100vh - 74px);
+      display:grid; grid-template-columns:370px 1fr;
+      height:calc(100vh - 74px);
     }
 
     .sidebar {
-      background: white; padding: 14px; overflow-y: auto;
-      border-right: 1px solid #e2e8f0;
-      display: flex; flex-direction: column; gap: 12px;
+      background:white; padding:14px; overflow-y:auto;
+      border-right:1px solid #e2e8f0;
+      display:flex; flex-direction:column; gap:12px;
     }
 
     .card {
-      background: #f8fafc; border: 1px solid #e2e8f0;
-      border-radius: 10px; padding: 12px;
+      background:#f8fafc; border:1px solid #e2e8f0;
+      border-radius:10px; padding:12px;
     }
     .card-title {
-      font-size: 11px; font-weight: 700; color: #475569;
-      text-transform: uppercase; letter-spacing: 0.05em;
-      margin-bottom: 10px; display: flex; align-items: center; gap: 5px;
+      font-size:11px; font-weight:700; color:#475569;
+      text-transform:uppercase; letter-spacing:.05em;
+      margin-bottom:10px; display:flex; align-items:center; gap:5px;
     }
 
-    .form-group { margin-bottom: 8px; }
+    .form-group { margin-bottom:8px; }
     .form-group label {
-      display: block; font-size: 11px; font-weight: 600;
-      color: #64748b; margin-bottom: 4px;
+      display:block; font-size:11px; font-weight:600;
+      color:#64748b; margin-bottom:4px;
     }
     .form-group input {
-      width: 100%; padding: 8px 10px;
-      border: 1px solid #cbd5e1; border-radius: 7px;
-      font-size: 13px; color: #1e293b; background: white;
-      transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit;
+      width:100%; padding:8px 10px;
+      border:1px solid #cbd5e1; border-radius:7px;
+      font-size:13px; color:#1e293b; background:white;
+      transition:border-color .2s,box-shadow .2s; font-family:inherit;
     }
     .form-group input:focus {
-      outline: none; border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+      outline:none; border-color:#3b82f6;
+      box-shadow:0 0 0 3px rgba(59,130,246,.1);
     }
-    .form-group input::placeholder { color: #94a3b8; font-size: 12px; }
+    .form-group input::placeholder { color:#94a3b8; font-size:12px; }
 
-    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-    /* Divider label di dalam form */
-    .field-note {
-      font-size: 10px; color: #94a3b8; margin: -4px 0 6px;
-      padding-left: 2px;
-    }
-
-    /* KK section divider */
-    .kk-divider {
-      border: none; border-top: 1px dashed #e2e8f0; margin: 6px 0;
-    }
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .field-note { font-size:10px; color:#94a3b8; margin:-3px 0 5px; padding-left:2px; }
+    .kk-divider { border:none; border-top:1px dashed #e2e8f0; margin:6px 0; }
 
     .btn {
-      width: 100%; padding: 10px; border: none; border-radius: 8px;
-      font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-      font-family: inherit;
+      width:100%; padding:10px; border:none; border-radius:8px;
+      font-size:13px; font-weight:600; cursor:pointer;
+      transition:all .2s; font-family:inherit;
     }
-    .btn-primary { background: linear-gradient(135deg,#1e40af,#3b82f6); color: white; }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(59,130,246,0.4); }
-    .btn-secondary { background: #f1f5f9; color: #475569; margin-top: 6px; }
-    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-primary { background:linear-gradient(135deg,#1e40af,#3b82f6); color:white; }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(59,130,246,.4); }
+    .btn-secondary { background:#f1f5f9; color:#475569; margin-top:6px; }
+    .btn-secondary:hover { background:#e2e8f0; }
 
     /* RESULT */
-    .result-panel { border-radius: 10px; padding: 12px; display: none; }
-    .result-panel.show { display: block; }
-    .result-panel.dalam  { background:#f0fdf4; border:1.5px solid #86efac; }
-    .result-panel.luar   { background:#fef2f2; border:1.5px solid #fca5a5; }
-    .result-panel.loading{ background:#f0f9ff; border:1.5px solid #7dd3fc; }
-    .result-panel.notfound{ background:#fefce8; border:1.5px solid #fde68a; }
+    .result-panel { border-radius:10px; padding:13px; display:none; }
+    .result-panel.show     { display:block; }
+    .result-panel.sesuai   { background:#f0fdf4; border:1.5px solid #86efac; }
+    .result-panel.tdk      { background:#fef2f2; border:1.5px solid #fca5a5; }
+    .result-panel.loading  { background:#f0f9ff; border:1.5px solid #7dd3fc; }
+    .result-panel.notfound { background:#fefce8; border:1.5px solid #fde68a; }
 
-    .result-status { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-    .status-icon {
-      width:38px; height:38px; border-radius:50%;
+    .result-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .result-icon {
+      width:40px; height:40px; border-radius:50%;
       display:flex; align-items:center; justify-content:center;
-      font-size:18px; flex-shrink:0;
+      font-size:20px; flex-shrink:0;
     }
-    .dalam   .status-icon { background:#dcfce7; }
-    .luar    .status-icon { background:#fee2e2; }
-    .loading .status-icon { background:#e0f2fe; }
-    .notfound .status-icon{ background:#fef9c3; }
+    .sesuai   .result-icon { background:#dcfce7; }
+    .tdk      .result-icon { background:#fee2e2; }
+    .loading  .result-icon { background:#e0f2fe; }
+    .notfound .result-icon { background:#fef9c3; }
 
-    .result-label { font-size:14px; font-weight:700; }
-    .dalam    .result-label { color:#16a34a; }
-    .luar     .result-label { color:#dc2626; }
-    .loading  .result-label { color:#0284c7; }
-    .notfound .result-label { color:#ca8a04; }
-
+    .result-title { font-size:14px; font-weight:700; }
+    .sesuai   .result-title { color:#16a34a; }
+    .tdk      .result-title { color:#dc2626; }
+    .loading  .result-title { color:#0284c7; }
+    .notfound .result-title { color:#ca8a04; }
     .result-sub { font-size:11px; color:#64748b; margin-top:2px; line-height:1.4; }
 
-    .info-row {
-      display:flex; justify-content:space-between; align-items:flex-start;
-      padding:5px 0; border-top:1px solid rgba(0,0,0,0.06); font-size:11px; gap:8px;
+    /* TABEL PERBANDINGAN */
+    .compare-table { width:100%; border-collapse:collapse; margin-top:8px; font-size:11px; }
+    .compare-table th {
+      background:#f1f5f9; color:#64748b; font-weight:700;
+      padding:6px 8px; text-align:left; font-size:10px;
+      text-transform:uppercase; letter-spacing:.04em;
     }
-    .info-row .key   { color:#64748b; flex-shrink:0; }
-    .info-row .value { font-weight:600; color:#1e293b; text-align:right; word-break:break-all; }
+    .compare-table td { padding:6px 8px; border-top:1px solid #f1f5f9; vertical-align:middle; }
+    .compare-table tr:hover td { background:#fafafa; }
+
+    .td-field { color:#64748b; font-weight:600; white-space:nowrap; }
+    .td-kk    { color:#1e293b; }
+    .td-koord { color:#1e293b; }
+    .td-status { text-align:center; font-size:14px; }
+
+    .badge-cocok {
+      display:inline-block; background:#dcfce7; color:#16a34a;
+      border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700;
+    }
+    .badge-beda {
+      display:inline-block; background:#fee2e2; color:#dc2626;
+      border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700;
+    }
+    .badge-skip {
+      display:inline-block; background:#f1f5f9; color:#94a3b8;
+      border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700;
+    }
 
     /* RADAR */
-    .radar-wrap { display:flex; justify-content:center; padding:6px 0; }
+    .radar-wrap { display:flex; justify-content:center; padding:8px 0; }
     .radar {
-      width:80px; height:80px; position:relative;
+      width:70px; height:70px; position:relative;
       display:flex; align-items:center; justify-content:center;
     }
     .radar-ring {
       position:absolute; border-radius:50%; border:2px solid;
-      animation: radarPulse 2s ease-out infinite;
+      animation:radarPulse 2s ease-out infinite;
     }
-    .radar-ring:nth-child(1){width:80px;height:80px;border-color:rgba(239,68,68,.6);animation-delay:0s}
-    .radar-ring:nth-child(2){width:54px;height:54px;border-color:rgba(239,68,68,.5);animation-delay:.5s}
-    .radar-ring:nth-child(3){width:28px;height:28px;border-color:rgba(239,68,68,.4);animation-delay:1s}
-    .radar-dot { width:9px;height:9px;background:#ef4444;border-radius:50%;z-index:1; }
+    .radar-ring:nth-child(1){width:70px;height:70px;border-color:rgba(239,68,68,.6);animation-delay:0s}
+    .radar-ring:nth-child(2){width:47px;height:47px;border-color:rgba(239,68,68,.5);animation-delay:.5s}
+    .radar-ring:nth-child(3){width:24px;height:24px;border-color:rgba(239,68,68,.4);animation-delay:1s}
+    .radar-dot { width:8px;height:8px;background:#ef4444;border-radius:50%;z-index:1; }
     @keyframes radarPulse {
-      0%  { opacity:1; transform:scale(.5); }
-      100%{ opacity:0; transform:scale(1.1); }
+      0%{opacity:1;transform:scale(.5)} 100%{opacity:0;transform:scale(1.1)}
     }
-
-    /* DIST BAR */
-    .dist-bar-wrap { margin-top:8px; }
-    .dist-bar-label { display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:3px; }
-    .dist-bar { height:7px;background:#e2e8f0;border-radius:99px;overflow:hidden; }
-    .dist-bar-fill { height:100%;border-radius:99px;transition:width .6s ease;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444); }
 
     /* MAP */
     .map-area { position:relative; }
@@ -149,10 +153,17 @@
     .map-badge {
       position:absolute; top:12px; right:12px; background:white;
       border-radius:8px; padding:5px 12px; font-size:12px; font-weight:600;
-      box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:500; display:none;
+      box-shadow:0 2px 8px rgba(0,0,0,.15); z-index:500; display:none;
     }
-    .map-badge.dalam { color:#16a34a; border:1px solid #86efac; }
-    .map-badge.luar  { color:#dc2626; border:1px solid #fca5a5; }
+    .map-badge.sesuai { color:#16a34a; border:1px solid #86efac; }
+    .map-badge.tdk    { color:#dc2626; border:1px solid #fca5a5; }
+
+    .geocode-info {
+      font-size:10px; color:#94a3b8; margin-top:8px;
+      padding:6px 8px; background:#f8fafc;
+      border-radius:6px; border:1px solid #e2e8f0;
+      word-break:break-all; line-height:1.5;
+    }
 
     .spinner {
       display:inline-block; width:13px; height:13px;
@@ -169,16 +180,9 @@
     .legend-item { display:flex; align-items:center; gap:6px; margin-bottom:3px; }
     .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 
-    /* TIPS BOX */
-    .tips-box {
-      background:#eff6ff; border:1px solid #bfdbfe;
-      border-radius:8px; padding:8px 10px;
-      font-size:11px; color:#1d4ed8; line-height:1.5;
-    }
-
     @media(max-width:768px){
       .container{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
-      .sidebar{max-height:55vh;}
+      .sidebar{max-height:60vh;}
     }
   </style>
 </head>
@@ -188,14 +192,14 @@
   <div class="header-icon">📍</div>
   <div>
     <h1>Cek Koordinat KK</h1>
-    <p>Verifikasi kesesuaian alamat Kartu Keluarga dengan titik koordinat</p>
+    <p>Verifikasi kesesuaian titik koordinat dengan alamat Kartu Keluarga</p>
   </div>
 </div>
 
 <div class="container">
   <div class="sidebar">
 
-    <!-- INPUT KK TERSTRUKTUR -->
+    <!-- FORM KK -->
     <div class="card">
       <div class="card-title">📄 Alamat pada Kartu Keluarga</div>
 
@@ -203,7 +207,6 @@
         <label>Jalan / Kampung / Dusun <span style="color:#94a3b8;font-weight:400">(opsional)</span></label>
         <input type="text" id="kkJalan" placeholder="Kp. Karang Mekar / Jl. Merdeka No. 10" />
       </div>
-
       <div class="row2">
         <div class="form-group">
           <label>RT</label>
@@ -218,7 +221,7 @@
       <hr class="kk-divider" />
 
       <div class="form-group">
-        <label>Kelurahan / Desa ✱</label>
+        <label>Kelurahan / Desa</label>
         <input type="text" id="kkKelurahan" placeholder="Cigadung" />
       </div>
       <div class="form-group">
@@ -233,11 +236,10 @@
         <label>Provinsi ✱</label>
         <input type="text" id="kkProvinsi" placeholder="Jawa Barat" />
       </div>
-
-      <div class="field-note">✱ Field wajib diisi untuk geocoding yang akurat</div>
+      <div class="field-note">✱ Wajib diisi &nbsp;·&nbsp; Sesuaikan ejaan dengan nama resmi di KK</div>
     </div>
 
-    <!-- INPUT KOORDINAT -->
+    <!-- KOORDINAT -->
     <div class="card">
       <div class="card-title">🗺️ Koordinat yang Dicek</div>
       <div class="row2">
@@ -250,7 +252,7 @@
           <input type="text" id="inputLng" placeholder="107.7583136" />
         </div>
       </div>
-      <div class="field-note">💡 Klik kanan Google Maps → "Salinan koordinat", atau klik langsung di peta</div>
+      <div class="field-note">💡 Klik kanan Google Maps → "Salinan koordinat", atau klik di peta</div>
     </div>
 
     <!-- TOMBOL -->
@@ -261,13 +263,14 @@
 
     <!-- HASIL -->
     <div id="resultPanel" class="result-panel">
-      <div class="result-status">
-        <div class="status-icon" id="statusIcon"></div>
+      <div class="result-header">
+        <div class="result-icon" id="resultIcon"></div>
         <div>
-          <div class="result-label" id="resultLabel"></div>
-          <div class="result-sub"  id="resultSub"></div>
+          <div class="result-title" id="resultTitle"></div>
+          <div class="result-sub"   id="resultSub"></div>
         </div>
       </div>
+
       <div id="radarWrap" class="radar-wrap" style="display:none">
         <div class="radar">
           <div class="radar-ring"></div>
@@ -276,18 +279,28 @@
           <div class="radar-dot"></div>
         </div>
       </div>
-      <div id="infoRows"></div>
-      <div id="distBarSection" class="dist-bar-wrap" style="display:none">
-        <div class="dist-bar-label"><span>0 m</span><span id="distBarMax"></span></div>
-        <div class="dist-bar"><div class="dist-bar-fill" id="distBarFill" style="width:0%"></div></div>
+
+      <div id="compareSection" style="display:none">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>KK</th>
+              <th>Koordinat</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="compareBody"></tbody>
+        </table>
+        <div class="geocode-info" id="geocodeInfo"></div>
       </div>
     </div>
 
     <!-- LEGENDA -->
     <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Titik Alamat KK (geocode)</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span>Titik Koordinat Input</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:transparent;border:2px solid #3b82f6;width:10px;height:10px;border-radius:50%"></div><span>Radius jangkauan dari KK</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Titik Koordinat Input</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span>Koordinat SESUAI wilayah KK</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span>Koordinat TIDAK SESUAI wilayah KK</span></div>
     </div>
 
   </div>
@@ -303,247 +316,219 @@
 // ---- MAP ----
 const map = L.map('map').setView([-6.5592545, 107.7583136], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors', maxZoom: 19
+  attribution:'© OpenStreetMap contributors', maxZoom:19
 }).addTo(map);
 
-let markerKK = null, markerInput = null, circleRadius = null, lineBetween = null;
+let markerInput = null;
 
-const iconKK = L.divIcon({
-  className: '',
-  html: `<div style="width:32px;height:32px;background:#3b82f6;border:3px solid white;
-    border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-    box-shadow:0 2px 8px rgba(59,130,246,.5)"></div>`,
-  iconSize: [32,32], iconAnchor: [16,32]
-});
-const iconInput = L.divIcon({
-  className: '',
-  html: `<div style="width:32px;height:32px;background:#ef4444;border:3px solid white;
-    border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-    box-shadow:0 2px 8px rgba(239,68,68,.5)"></div>`,
-  iconSize: [32,32], iconAnchor: [16,32]
-});
-
-// ---- HAVERSINE ----
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371000, r = d => d * Math.PI / 180;
-  const dLat = r(lat2-lat1), dLon = r(lon2-lon1);
-  const a = Math.sin(dLat/2)**2 + Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+function makeIcon(color) {
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:32px;height:32px;background:${color};border:3px solid white;
+      border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+      box-shadow:0 2px 8px ${color}88"></div>`,
+    iconSize:[32,32], iconAnchor:[16,32]
+  });
 }
 
-function formatJarak(m) {
-  return m >= 1000 ? (m/1000).toFixed(2)+' km' : Math.round(m)+' m';
+// ---- NORMALIZE untuk perbandingan ----
+function normalize(s) {
+  return (s || '')
+    .toLowerCase()
+    .replace(/\b(kelurahan|kel\.?|kecamatan|kec\.?|kabupaten|kab\.?|kota|desa|ds\.?|provinsi|prov\.?)\s*/g,'')
+    .replace(/[^a-z0-9\s]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
 }
 
-// ---- GEOCODING ----
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-async function nominatimSearch(q) {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&addressdetails=1&countrycodes=id`;
-  const res  = await fetch(url, { headers: { 'Accept-Language':'id', 'User-Agent':'CekKoordinatKK/1.0' } });
-  const data = await res.json();
-  if (data && data.length > 0) {
-    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), displayName: data[0].display_name, usedQuery: q };
-  }
-  return null;
+// Cek apakah dua string cukup mirip (satu mengandung yang lain)
+function isMatch(a, b) {
+  if (!a || !b) return false;
+  const na = normalize(a), nb = normalize(b);
+  if (!na || !nb) return false;
+  return na.includes(nb) || nb.includes(na) || levenshtein(na, nb) <= 2;
 }
 
-// Bersihkan prefix administratif agar tidak mengacaukan query
-function stripPrefixes(s) {
-  return s
-    .replace(/\b(KELURAHAN|KEL|KECAMATAN|KEC|KABUPATEN|KAB|DESA|DS|KAMPUNG|KP|KOTA)\b\.?\s*/gi, '')
-    .replace(/\s{2,}/g,' ').trim();
+// Levenshtein distance sederhana
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length:m+1}, (_,i) => Array.from({length:n+1}, (_,j) => i||j));
+  for (let i=1;i<=m;i++) for (let j=1;j<=n;j++)
+    dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
 }
 
-async function geocodeKK(fields, onProgress) {
-  const { kelurahan, kecamatan, kabkota, provinsi } = fields;
+// ---- REVERSE GEOCODING ----
+async function reverseGeocode(lat, lng) {
+  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&zoom=14`;
+  const res  = await fetch(url, { headers:{ 'Accept-Language':'id', 'User-Agent':'CekKoordinatKK/1.0' } });
+  return res.json();
+}
 
-  // Bersihkan prefix tiap field
-  const kel  = stripPrefixes(kelurahan).trim();
-  const kec  = stripPrefixes(kecamatan).trim();
-  const kab  = stripPrefixes(kabkota).trim();
-  const prov = stripPrefixes(provinsi).trim();
-
-  // Susun urutan percobaan dari paling spesifik ke paling umum
-  const attempts = [];
-
-  if (kel && kec && kab && prov)
-    attempts.push({ q: `${kel}, ${kec}, ${kab}, ${prov}, Indonesia`, label: 'Mencoba kelurahan + kecamatan + kabupaten...' });
-
-  if (kec && kab && prov)
-    attempts.push({ q: `${kec}, ${kab}, ${prov}, Indonesia`, label: 'Mencoba kecamatan + kabupaten...' });
-
-  if (kel && kab && prov)
-    attempts.push({ q: `${kel}, ${kab}, ${prov}, Indonesia`, label: 'Mencoba kelurahan + kabupaten...' });
-
-  if (kab && prov)
-    attempts.push({ q: `${kab}, ${prov}, Indonesia`, label: 'Mencoba kabupaten + provinsi...' });
-
-  if (kec && prov)
-    attempts.push({ q: `${kec}, ${prov}, Indonesia`, label: 'Mencoba kecamatan + provinsi...' });
-
-  for (let i = 0; i < attempts.length; i++) {
-    const { q, label } = attempts[i];
-    onProgress && onProgress(`${label} (${i+1}/${attempts.length})`);
-    const result = await nominatimSearch(q);
-    if (result) return result;
-    if (i < attempts.length - 1) await delay(1100);
-  }
-  return null;
+// Ambil field dari response Nominatim (prioritas untuk Indonesia)
+function parseNominatimAddress(addr) {
+  return {
+    kelurahan : addr.village || addr.suburb || addr.quarter || addr.neighbourhood || addr.hamlet || '',
+    kecamatan : addr.city_district || addr.district || addr.subdistrict || '',
+    kabkota   : addr.county || addr.city || addr.municipality || addr.town || '',
+    provinsi  : addr.state || '',
+  };
 }
 
 // ---- CLEAR MAP ----
 function clearMap() {
-  [markerKK, markerInput, circleRadius, lineBetween].forEach(l => { if(l) map.removeLayer(l); });
-  markerKK = markerInput = circleRadius = lineBetween = null;
-}
-
-// ---- SHOW RESULT ----
-function showResult({ status, label, sub, icon, rows, jarak, threshold }) {
-  const panel = document.getElementById('resultPanel');
-  panel.className = 'result-panel show ' + status;
-  document.getElementById('statusIcon').textContent  = icon;
-  document.getElementById('resultLabel').textContent = label;
-  document.getElementById('resultSub').innerHTML     = sub;
-
-  document.getElementById('infoRows').innerHTML = rows.map(r =>
-    `<div class="info-row"><span class="key">${r.key}</span><span class="value">${r.val}</span></div>`
-  ).join('');
-
-  document.getElementById('radarWrap').style.display = (status === 'luar') ? 'flex' : 'none';
-
-  if (jarak !== null && threshold) {
-    const MAX_BAR = Math.max(jarak * 1.5, threshold * 2);
-    document.getElementById('distBarSection').style.display = 'block';
-    document.getElementById('distBarMax').textContent        = formatJarak(MAX_BAR);
-    document.getElementById('distBarFill').style.width       = Math.min(jarak/MAX_BAR*100, 100) + '%';
-  } else {
-    document.getElementById('distBarSection').style.display = 'none';
-  }
-
-  const badge = document.getElementById('mapBadge');
-  badge.className = 'map-badge ' + (status === 'dalam' ? 'dalam' : 'luar');
-  badge.style.display = 'block';
-  badge.textContent = label;
+  if (markerInput) { map.removeLayer(markerInput); markerInput = null; }
 }
 
 // ---- MAIN ----
 async function cekKoordinat() {
-  const fields = {
-    jalan    : document.getElementById('kkJalan').value.trim(),
-    rt       : document.getElementById('kkRT').value.trim(),
-    rw       : document.getElementById('kkRW').value.trim(),
-    kelurahan: document.getElementById('kkKelurahan').value.trim(),
-    kecamatan: document.getElementById('kkKecamatan').value.trim(),
-    kabkota  : document.getElementById('kkKabkota').value.trim(),
-    provinsi : document.getElementById('kkProvinsi').value.trim(),
-  };
+  const kkKelurahan = document.getElementById('kkKelurahan').value.trim();
+  const kkKecamatan = document.getElementById('kkKecamatan').value.trim();
+  const kkKabkota   = document.getElementById('kkKabkota').value.trim();
+  const kkProvinsi  = document.getElementById('kkProvinsi').value.trim();
+  const latStr      = document.getElementById('inputLat').value.trim();
+  const lngStr      = document.getElementById('inputLng').value.trim();
 
-  const latStr = document.getElementById('inputLat').value.trim();
-  const lngStr = document.getElementById('inputLng').value.trim();
-
-  if (!fields.kelurahan && !fields.kecamatan && !fields.kabkota) {
+  if (!kkKecamatan || !kkKabkota) {
     alert('Harap isi minimal Kecamatan dan Kabupaten/Kota dari KK.');
     return;
   }
-  if (!latStr || !lngStr) { alert('Harap isi latitude dan longitude.'); return; }
+  if (!latStr || !lngStr) { alert('Harap isi Latitude dan Longitude.'); return; }
 
-  const inputLat = parseFloat(latStr), inputLng = parseFloat(lngStr);
-  if (isNaN(inputLat) || isNaN(inputLng)) {
+  const lat = parseFloat(latStr), lng = parseFloat(lngStr);
+  if (isNaN(lat) || isNaN(lng)) {
     alert('Koordinat tidak valid. Gunakan angka desimal, misal: -6.5592545');
     return;
   }
 
-  // Tentukan threshold: kecamatan ~3km, kelurahan ~1km
-  // Jika kelurahan diisi → radius 1000m, jika tidak → 3000m
-  const THRESHOLD = fields.kelurahan ? 1000 : 3000;
-
-  // Loading
+  // Loading state
   const panel = document.getElementById('resultPanel');
   panel.className = 'result-panel show loading';
-  document.getElementById('statusIcon').textContent  = '⏳';
-  document.getElementById('resultLabel').innerHTML   = '<span class="spinner"></span>Sedang mengecek...';
-  document.getElementById('resultSub').textContent   = 'Menghubungi server geocoding...';
-  document.getElementById('infoRows').innerHTML      = '';
-  document.getElementById('radarWrap').style.display = 'none';
-  document.getElementById('distBarSection').style.display = 'none';
-  document.getElementById('mapBadge').style.display  = 'none';
+  document.getElementById('resultIcon').textContent  = '⏳';
+  document.getElementById('resultTitle').innerHTML   = '<span class="spinner"></span>Sedang mengecek...';
+  document.getElementById('resultSub').textContent   = 'Reverse geocoding koordinat...';
+  document.getElementById('radarWrap').style.display  = 'none';
+  document.getElementById('compareSection').style.display = 'none';
+  document.getElementById('mapBadge').style.display   = 'none';
   clearMap();
 
-  let geo;
+  // Reverse geocode
+  let geoData;
   try {
-    geo = await geocodeKK(fields, msg => {
-      document.getElementById('resultSub').textContent = msg;
-    });
+    geoData = await reverseGeocode(lat, lng);
   } catch(e) {
-    alert('Gagal terhubung ke layanan geocoding. Periksa koneksi internet.');
+    alert('Gagal terhubung ke server geocoding. Periksa koneksi internet.');
     panel.className = 'result-panel';
     return;
   }
 
-  if (!geo) {
+  if (!geoData || geoData.error) {
     panel.className = 'result-panel show notfound';
-    document.getElementById('statusIcon').textContent  = '⚠️';
-    document.getElementById('resultLabel').textContent = 'Alamat tidak ditemukan';
-    document.getElementById('resultSub').innerHTML     =
-      'Semua variasi dicoba tapi gagal.<br>' +
-      '<b>Cek ejaan</b> Kelurahan / Kecamatan / Kabupaten — harus sesuai nama resmi.';
-    document.getElementById('radarWrap').style.display = 'none';
+    document.getElementById('resultIcon').textContent  = '⚠️';
+    document.getElementById('resultTitle').textContent = 'Koordinat tidak dikenali';
+    document.getElementById('resultSub').textContent   = 'Koordinat mungkin berada di laut atau area tanpa data peta.';
     return;
   }
 
-  const jarak = haversine(geo.lat, geo.lng, inputLat, inputLng);
-  const dalamJangkauan = jarak <= THRESHOLD;
+  const fromCoord = parseNominatimAddress(geoData.address || {});
 
-  // Marker KK
-  markerKK = L.marker([geo.lat, geo.lng], { icon: iconKK })
-    .addTo(map).bindPopup(`<b>📄 Alamat KK (geocode)</b><br>${geo.displayName}<br><small>Query: ${geo.usedQuery}</small>`);
-
-  // Marker input
-  markerInput = L.marker([inputLat, inputLng], { icon: iconInput })
-    .addTo(map).bindPopup(`<b>📍 Koordinat Input</b><br>Lat: ${inputLat}, Lng: ${inputLng}`);
-
-  // Lingkaran radius
-  circleRadius = L.circle([geo.lat, geo.lng], {
-    radius: THRESHOLD, color: '#3b82f6',
-    fillColor: '#3b82f6', fillOpacity: 0.07, weight: 2, dashArray: '6 4'
-  }).addTo(map);
-
-  // Garis penghubung
-  lineBetween = L.polyline([[geo.lat, geo.lng],[inputLat, inputLng]], {
-    color: dalamJangkauan ? '#22c55e' : '#ef4444', weight: 2.5, dashArray: '5 4'
-  }).addTo(map);
-
-  map.fitBounds([[geo.lat, geo.lng],[inputLat, inputLng]], { padding: [60,60] });
-
-  // Susun alamat KK lengkap untuk ditampilkan
-  const alamatKK = [
-    fields.jalan ? `${fields.jalan}${fields.rt ? ', RT '+fields.rt+'/RW '+fields.rw : ''}` : '',
-    fields.kelurahan ? 'Kel. ' + fields.kelurahan : '',
-    fields.kecamatan ? 'Kec. ' + fields.kecamatan : '',
-    fields.kabkota, fields.provinsi
-  ].filter(Boolean).join(', ');
-
-  const rows = [
-    { key: 'Jarak',           val: formatJarak(jarak) },
-    { key: 'Batas Jangkauan', val: formatJarak(THRESHOLD) },
-    { key: 'Titik KK',        val: `${geo.lat.toFixed(6)}, ${geo.lng.toFixed(6)}` },
-    { key: 'Titik Input',     val: `${inputLat.toFixed(6)}, ${inputLng.toFixed(6)}` },
-    { key: 'Geocode via',     val: geo.usedQuery },
+  // Buat baris perbandingan
+  const fields = [
+    {
+      label  : 'Kelurahan/Desa',
+      kkVal  : kkKelurahan,
+      geoVal : fromCoord.kelurahan,
+      wajib  : false
+    },
+    {
+      label  : 'Kecamatan',
+      kkVal  : kkKecamatan,
+      geoVal : fromCoord.kecamatan,
+      wajib  : true
+    },
+    {
+      label  : 'Kab/Kota',
+      kkVal  : kkKabkota,
+      geoVal : fromCoord.kabkota,
+      wajib  : true
+    },
+    {
+      label  : 'Provinsi',
+      kkVal  : kkProvinsi,
+      geoVal : fromCoord.provinsi,
+      wajib  : !!kkProvinsi
+    },
   ];
 
-  if (dalamJangkauan) {
-    showResult({ status:'dalam', icon:'✅', label:'✅ Dalam Jangkauan',
-      sub: `Koordinat sesuai dengan area alamat KK (radius ${formatJarak(THRESHOLD)})`,
-      rows, jarak, threshold: THRESHOLD });
+  // Evaluasi tiap field
+  let adaYangBeda = false;
+  const rows = fields.map(f => {
+    if (!f.kkVal) return { ...f, status: 'skip', match: true };
+    const match = isMatch(f.kkVal, f.geoVal);
+    if (!match && f.wajib) adaYangBeda = true;
+    return { ...f, match };
+  });
+
+  const sesuai = !adaYangBeda;
+
+  // Render tabel
+  document.getElementById('compareBody').innerHTML = rows.map(r => {
+    let badge, statusIcon;
+    if (r.status === 'skip') {
+      badge = `<span class="badge-skip">—</span>`;
+      statusIcon = '—';
+    } else if (r.match) {
+      badge = `<span class="badge-cocok">✓ Cocok</span>`;
+      statusIcon = '✅';
+    } else {
+      badge = `<span class="badge-beda">✗ Beda</span>`;
+      statusIcon = '❌';
+    }
+    return `
+      <tr>
+        <td class="td-field">${r.label}</td>
+        <td class="td-kk">${r.kkVal || '<span style="color:#94a3b8">—</span>'}</td>
+        <td class="td-koord">${r.geoVal || '<span style="color:#94a3b8">tidak terdeteksi</span>'}</td>
+        <td class="td-status">${badge}</td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('geocodeInfo').textContent =
+    'Alamat dari koordinat: ' + (geoData.display_name || '-');
+
+  document.getElementById('compareSection').style.display = 'block';
+
+  // Marker
+  const color = sesuai ? '#22c55e' : '#ef4444';
+  markerInput = L.marker([lat, lng], { icon: makeIcon(color) })
+    .addTo(map)
+    .bindPopup(`<b>${sesuai ? '✅ Sesuai' : '❌ Tidak Sesuai'}</b><br>Lat: ${lat}<br>Lng: ${lng}<br><small>${geoData.display_name || ''}</small>`)
+    .openPopup();
+  map.setView([lat, lng], 14);
+
+  // Badge peta
+  const badge = document.getElementById('mapBadge');
+  badge.className = 'map-badge ' + (sesuai ? 'sesuai' : 'tdk');
+  badge.style.display = 'block';
+  badge.textContent = sesuai ? '✅ Koordinat Sesuai KK' : '❌ Koordinat Tidak Sesuai KK';
+
+  // Panel hasil
+  if (sesuai) {
+    panel.className = 'result-panel show sesuai';
+    document.getElementById('resultIcon').textContent  = '✅';
+    document.getElementById('resultTitle').textContent = 'Koordinat Sesuai Alamat KK';
+    document.getElementById('resultSub').textContent   = 'Wilayah dari koordinat cocok dengan data Kartu Keluarga.';
+    document.getElementById('radarWrap').style.display = 'none';
   } else {
-    const lebih = formatJarak(jarak - THRESHOLD);
-    showResult({ status:'luar', icon:'🚨', label:'🚨 Di Luar Jangkauan',
-      sub: `Koordinat meleset <b>${lebih}</b> dari batas jangkauan ${formatJarak(THRESHOLD)}`,
-      rows, jarak, threshold: THRESHOLD });
+    panel.className = 'result-panel show tdk';
+    document.getElementById('resultIcon').textContent  = '🚨';
+    document.getElementById('resultTitle').textContent = 'Koordinat TIDAK Sesuai KK';
+    document.getElementById('resultSub').innerHTML     = 'Wilayah dari koordinat <b>berbeda</b> dengan alamat di Kartu Keluarga.';
+    document.getElementById('radarWrap').style.display = 'flex';
   }
 }
 
+// ---- RESET ----
 function resetForm() {
   ['kkJalan','kkRT','kkRW','kkKelurahan','kkKecamatan','kkKabkota','kkProvinsi','inputLat','inputLng']
     .forEach(id => document.getElementById(id).value = '');
@@ -559,6 +544,5 @@ map.on('click', e => {
   document.getElementById('inputLng').value = e.latlng.lng.toFixed(7);
 });
 </script>
-
 </body>
 </html>
