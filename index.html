@@ -76,6 +76,7 @@
     }
     .jarak-badge.dekat { background:#dcfce7;color:#16a34a; }
     .jarak-badge.jauh  { background:#fee2e2;color:#dc2626; }
+    .ref-note { margin-top:-2px;margin-bottom:8px;font-size:10px;color:#64748b;line-height:1.45; }
 
     /* DIST BAR */
     .dist-bar-wrap { margin:6px 0 10px; }
@@ -213,6 +214,7 @@
       <!-- JARAK -->
       <div id="jarakSection" style="display:none">
         <div id="jarakBadge" class="jarak-badge"></div>
+        <div id="refNote" class="ref-note"></div>
         <div class="dist-bar-wrap">
           <div class="dist-bar-label"><span>0 m</span><span id="distBarMax"></span></div>
           <div class="dist-bar"><div class="dist-bar-fill" id="distBarFill" style="width:0%"></div></div>
@@ -242,6 +244,7 @@
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span>Koordinat SESUAI wilayah KK</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span>Koordinat TIDAK SESUAI / jauh</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Referensi hasil geocoding alamat/wilayah</span></div>
     </div>
 
   </div>
@@ -324,13 +327,61 @@ async function reverseGeocode(lat, lng) {
   return res.json();
 }
 
-// ---- FORWARD GEOCODE (untuk hitung jarak) ----
-async function forwardGeocode(kecamatan, kabkota, provinsi) {
-  const q = [kecamatan, kabkota, provinsi, 'Indonesia'].filter(Boolean).join(', ');
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=id`;
-  const res  = await fetch(url, { headers:{'Accept-Language':'id','User-Agent':'CekKoordinatKK/1.0'} });
-  const data = await res.json();
-  if (data && data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+// ---- FORWARD GEOCODE (coba dari paling spesifik ke paling umum) ----
+async function forwardGeocode(jalan, kelurahan, kecamatan, kabkota, provinsi) {
+  // Bersihkan prefix jalan/kampung agar geocoding lebih pas
+  const jalanBersih = (jalan||'')
+    .replace(/\bKp\.?\s*/gi,'').replace(/\bJl\.?\s*/gi,'Jalan ')
+    .replace(/\bKampung\b\s*/gi,'')
+    .replace(/\b(no|nomor)\.?\s*\d+[a-z]?\b/gi,'')
+    .replace(/\s+/g,' ').trim();
+
+  const jalanTanpaPrefix = jalanBersih.replace(/\bJalan\s+/gi,'').trim();
+  const jalanVariants = [...new Set([
+    jalanBersih,
+    jalanTanpaPrefix,
+    jalanBersih.replace(/\bArief\b/gi,'Arif').replace(/\bRahman\b/gi,'Rachman'),
+    jalanTanpaPrefix.replace(/\bArief\b/gi,'Arif').replace(/\bRahman\b/gi,'Rachman')
+  ].filter(Boolean))];
+
+  const attempts = [];
+
+  // Level 1: Jalan + Kelurahan + Kecamatan
+  if (kelurahan && kecamatan)
+    jalanVariants.forEach(j => attempts.push({ q:`${j}, ${kelurahan}, ${kecamatan}, ${kabkota}, ${provinsi}, Indonesia`, level:`Alamat jalan`, precision:'detail' }));
+
+  // Level 2: Jalan + Kecamatan
+  if (kecamatan)
+    jalanVariants.forEach(j => attempts.push({ q:`${j}, ${kecamatan}, ${kabkota}, ${provinsi}, Indonesia`, level:`Jalan di kec. ${kecamatan}`, precision:'detail' }));
+
+  // Level 3: Kelurahan + Kecamatan
+  if (kelurahan && kecamatan)
+    attempts.push({ q:`${kelurahan}, ${kecamatan}, ${kabkota}, ${provinsi}, Indonesia`, level:`Kel. ${kelurahan}`, precision:'area' });
+
+  // Level 4: Kecamatan + Kabupaten
+  if (kecamatan && kabkota)
+    attempts.push({ q:`${kecamatan}, ${kabkota}, ${provinsi}, Indonesia`, level:`Kec. ${kecamatan}`, precision:'area' });
+
+  // Level 5: Kabupaten saja
+  if (kabkota)
+    attempts.push({ q:`${kabkota}, ${provinsi}, Indonesia`, level:`Kab/Kota ${kabkota}`, precision:'area' });
+
+  for (let i = 0; i < attempts.length; i++) {
+    const { q, level, precision } = attempts[i];
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=id&addressdetails=1`;
+    const res  = await fetch(url, { headers:{'Accept-Language':'id','User-Agent':'CekKoordinatKK/1.0'} });
+    const data = await res.json();
+    if (data && data.length > 0)
+      return {
+        lat:parseFloat(data[0].lat),
+        lng:parseFloat(data[0].lon),
+        level,
+        precision,
+        usedQuery:q,
+        displayName:data[0].display_name || ''
+      };
+    if (i < attempts.length - 1) await delay(1100);
+  }
   return null;
 }
 
@@ -391,9 +442,10 @@ async function cekKoordinat() {
   const addr = geoData.address || {};
 
   // 2. Forward geocode KK untuk dapat titik referensi & hitung jarak
-  document.getElementById('resultSub').textContent = 'Menghitung jarak...';
+  document.getElementById('resultSub').textContent = 'Mencari titik referensi alamat KK...';
   await delay(1100); // jaga rate limit
-  const refPoint = await forwardGeocode(kkKecamatan, kkKabkota, kkProvinsi);
+  const kkJalan = document.getElementById('kkJalan').value.trim();
+  const refPoint = await forwardGeocode(kkJalan, kkKelurahan, kkKecamatan, kkKabkota, kkProvinsi);
   const jarak = refPoint ? haversine(refPoint.lat, refPoint.lng, lat, lng) : null;
 
   // 3. Match setiap field KK ke semua field Nominatim
@@ -426,7 +478,7 @@ async function cekKoordinat() {
   if (refPoint) {
     markerRef = L.marker([refPoint.lat,refPoint.lng], { icon:makeIcon('#3b82f6') })
       .addTo(map)
-      .bindPopup(`<b>📄 Pusat wilayah KK</b><br>${kkKecamatan}, ${kkKabkota}`);
+      .bindPopup(`<b>📄 Referensi geocoding</b><br>Level: ${refPoint.level}<br><small>${refPoint.displayName || refPoint.usedQuery}</small>`);
 
     lineLayer = L.polyline([[refPoint.lat,refPoint.lng],[lat,lng]], {
       color: sesuai?'#22c55e':'#ef4444', weight:2.5, dashArray:'6 4'
@@ -463,11 +515,14 @@ async function cekKoordinat() {
 
   // 7. Jarak
   if (jarak !== null) {
-    const MAX_BAR = Math.max(jarak*1.5, 5000);
+    const MAX_BAR = Math.max(jarak*1.5, 1000);
     const pct     = Math.min(jarak/MAX_BAR*100, 100);
     const jarakBadge = document.getElementById('jarakBadge');
-    jarakBadge.className = 'jarak-badge ' + (jarak<=3000?'dekat':'jauh');
-    jarakBadge.textContent = `📏 ${formatJarak(jarak)} dari pusat wilayah KK`;
+    jarakBadge.className = 'jarak-badge ' + (jarak<=500?'dekat':'jauh');
+    jarakBadge.textContent = `📏 ${formatJarak(jarak)} dari titik referensi (${refPoint.level})`;
+    document.getElementById('refNote').textContent = refPoint.precision === 'area'
+      ? 'Catatan: titik biru adalah pusat wilayah hasil geocoding, bukan koordinat rumah/sekolah yang sama dengan titik input.'
+      : 'Catatan: titik biru adalah hasil pencarian alamat/jalan dari data OpenStreetMap; bisa berbeda sedikit dari koordinat yang Anda salin.';
     document.getElementById('distBarMax').textContent   = formatJarak(MAX_BAR);
     document.getElementById('distBarFill').style.width  = pct+'%';
     document.getElementById('jarakSection').style.display = 'block';
